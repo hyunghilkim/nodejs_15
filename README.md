@@ -27,7 +27,9 @@
  - GET /contacts/edit/:id , 해당 제품 수정하기 보여주기
  * (입력폼에 수정 전 제품정보가 기재)
  - POST /contacts/edit/:id , 해당 제품 정보 수정하기
- - GET /admin/products/delete/:id , 해당 제품 정보 삭제하기
+ - GET /contacts/delete/:id , 해당 제품 정보 삭제하기
+ - POST /contacts/detail/:id , 해당 제품 댓글 등록하기
+ - GET  /contacts/delete/:product_id/:memo_id , 해당 제품 댓글 삭제하기
 ```
 
 ### flow
