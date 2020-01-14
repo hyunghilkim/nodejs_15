@@ -1,6 +1,96 @@
 # nodejs_15
 
-## 과제
+## 요약
+
+### admin API
+
+```
+ - GET /admin/products , 전체 제품 리스트 보여주기
+ - GET /admin/products/write , 제품 등록페이지 보여주기
+ - POST /admin/products/write , 제품 등록하기
+ - GET /admin/products/detail/:id , 해당 제품 상세페이지 보여주기
+ - GET /admin/products/edit/:id , 해당 제품 수정하기 보여주기
+   * (입력폼에 수정 전 제품정보가 기재)
+ - POST /admin/products/edit/:id , 해당 제품 정보 수정하기
+ - GET /admin/products/delete/:id , 해당 제품 정보 삭제하기, 댓글도 삭제
+ - POST /admin/products/detail/:id , 해당 제품 댓글 등록하기
+ - GET  /admin/products/delete/:product_id/:memo_id , 해당 제품 댓글 삭제하기
+```
+
+### contacts API
+
+```
+ - GET /contacts , 전체 제품 리스트 보여주기
+ - GET /contacts/write , 제품 등록페이지 보여주기
+ - POST /contacts/write , 제품 등록하기
+ - GET /contacts/detail:id , 해당 제품 상세페이지 보여주기
+ - GET /contacts/edit/:id , 해당 제품 수정하기 보여주기
+ * (입력폼에 수정 전 제품정보가 기재)
+ - POST /contacts/edit/:id , 해당 제품 정보 수정하기
+ - GET /admin/products/delete/:id , 해당 제품 정보 삭제하기
+```
+
+### flow
+
+```
+ <model>
+ - DB(mysql)와 연결 , index.js
+ - DB table 컬럼 스펙 정의, define
+ - DB table간의 관계 정의
+ <control>
+ - 각 API에 대한 DB쿼리 로직 구현 , 비동기 await
+```
+
+### 시퀄라이즈 모델 관계 정의
+
+```
+<models/Products.js>
+
+- DB모델A.associate = models => {
+  //모델 관계 정의 로직
+  DB모델A.hasMany(DB모델B ,옵션)
+}
+
+- 1:N => hasMany ex) 제품 하나의 여러개 댓글이 달리는 경우
+- 1:1 => hasOne
+- N:M => belongsToMany ex) 해쉬테그
+```
+
+### 시퀄라이즈 모델 정의하기
+
+```
+- mysql에서 정의한 테이블은 시퀄라이즈에서도 정의해야 한다.
+- mysql의 테이블은 시퀄라이즈 모델과 대응된다.
+
+module.exports = function(sequelize, DataTypes) {
+  const Products = sequelize.define("Products", {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    name: { type: DataTypes.STRING },
+    price: { type: DataTypes.INTEGER },
+    description: { type: DataTypes.TEXT }
+  });
+
+  return Products;
+};
+
+- sequelize.define() 메서드로 테이블명과 각 컬럼의 스펙을 입력한다.
+- sequelize.define('테이블명', {각 컬럼의 스펙}, {테이블명});
+```
+
+### 시퀄라이즈 CRUD (생성, 조회, 수정, 삭제)
+
+```
+<CREATE>
+models.모델명(테이블).create(데이터)
+<READ>
+models.모델명(테이블).findByPk(아이디)
+models.모델명(테이블).findOne(조건)
+models.모델명(테이블).findAll()
+<UPDATE>
+models.모델명(테이블).update(데이터,조건)
+<DELETE>
+models.모델명(테이블).destroy(데이터,조건)
+```
 
 ### express 모듈 - response
 
@@ -136,38 +226,55 @@ db.sequelize.sync();
 - sync() 메서드를 사용하면 서버 실행 시 알아서 mysql과 연동된다.
 ```
 
-### 시퀄라이즈 모델 정의하기
+### View
+
+#### Nunjucks
 
 ```
-- mysql에서 정의한 테이블은 시퀄라이즈에서도 정의해야 한다.
-- mysql의 테이블은 시퀄라이즈 모델과 대응된다.
+- 템플릿 상속
+  템플릿 상속은 템플릿을 쉽게 재사용 할 수있는 방법입니다. 템플릿을 작성할 때 하위 템플릿이 무시할 수있는 "블록"을 정의 할 수 있습니다.
 
-module.exports = function(sequelize, DataTypes) {
-  const Products = sequelize.define("Products", {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    name: { type: DataTypes.STRING },
-    price: { type: DataTypes.INTEGER },
-    description: { type: DataTypes.TEXT }
-  });
+  {% extends "parent.html(부모 템플릿)" %}
 
-  return Products;
-};
 
-- sequelize.define() 메서드로 테이블명과 각 컬럼의 스펙을 입력한다.
-- sequelize.define('테이블명', {각 컬럼의 스펙});
+- 변수
+  {{변수}}
+
+- if
+
+  {% if variable %}
+  It is true
+  {% endif %}
+
+- for
+
+  var items = [{ title: "foo", id: 1 }, { title: "bar", id: 2}];
+
+  <h1>Posts</h1>
+  <ul>
+  {% for item in items %}
+    <li>{{ item.title }}</li>
+  {% else %}
+    <li>This would display if the 'item' collection were empty</li>
+  {% endfor %}
+  </ul>
+
+- for in
+
+  {% for fruit, color in fruits %}
+  Did you know that {{ fruit }} is {{ color }}?
+  {% endfor %}
+
+
 ```
 
-### 시퀄라이즈 CRUD (생성, 조회, 수정, 삭제)
+#### HTML form/input/textarea ...
 
 ```
-<CREATE>
-models.모델명(테이블).create({각 컬럼에 대입 값})
-<READ>
-models.모델명(테이블).findByPk(기본키값)
-models.모델명(테이블).findOne()
-models.모델명(테이블).findAll()
-<UPDATE>
-models.모델명(테이블).update()
-<DELETE>
-models.모델명(테이블).destroy()
+<form>
+- action : 주소, 비워두면 동적처리
+- method : get, post
+<input>
+- name : 입력값이 name에 정해진 변수명으로 저장 , req.body
+- value : 입력창에 보여진다.
 ```

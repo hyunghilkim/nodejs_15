@@ -3,11 +3,13 @@ const nunjucks = require("nunjucks");
 const logger = require("morgan");
 const bodyParser = require("body-parser");
 const admin = require("./routes/admin");
+/* const adminAsync = require("./routes/adminAsync"); */
 const contacts = require("./routes/contacts");
 const app = express();
-const port = 3000;
+const port = 3366;
 // db 관련
 const db = require("./models");
+const cookieParser = require("cookie-parser");
 
 nunjucks.configure("template", {
   autoescape: true,
@@ -18,6 +20,10 @@ nunjucks.configure("template", {
 app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+//업로드 path 추가
+app.use("/uploads", express.static("uploads"));
 
 // DB authentication
 db.sequelize
